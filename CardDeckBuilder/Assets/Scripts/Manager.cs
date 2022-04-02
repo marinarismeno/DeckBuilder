@@ -37,7 +37,7 @@ public class Manager : MonoBehaviour
     {       
         selectedCards = new List<Data>();
         deckDropdown = DeckDropdownTransform.GetComponent<TMP_Dropdown>();
-        request = "https://api.pokemontcg.io/v2/cards?page=1&pageSize=60"; // 
+        request = "https://api.pokemontcg.io/v2/cards?page=1&pageSize=60";
 
         deckDropdown.ClearOptions();
         ClearContentsOf(DeckContentTransform);
@@ -90,7 +90,6 @@ public class Manager : MonoBehaviour
         SortCollectionCards(0);
        
     }
-
 
 
     public IEnumerator LoadImageFromURL(string URL, Image cell)
