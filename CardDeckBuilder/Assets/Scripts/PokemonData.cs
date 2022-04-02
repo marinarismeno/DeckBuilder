@@ -173,7 +173,8 @@ public class Data
     public Set set;
     public string number;
     public string artist;
-    public string rarity;
+    public string rarity = "";
+    public int rarityNo;
     public List<int> nationalPokedexNumbers;
     public Legalities legalities;
     public Images images;

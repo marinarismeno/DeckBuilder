@@ -16,10 +16,7 @@ public class CardInfo : MonoBehaviour
     {
         manager = GameObject.Find("Manager").GetComponent<Manager>();
     }
-    private void Start()
-    {
-        //ShowCardMenu(false);
-    }
+
     public void Init(Data _data)
     {
         cardData = _data;

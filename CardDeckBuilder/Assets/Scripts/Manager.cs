@@ -1,10 +1,10 @@
+using Newtonsoft.Json;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.Networking;
-using Newtonsoft.Json;
 using TMPro;
+using UnityEngine;
+using UnityEngine.Networking;
+using UnityEngine.UI;
 
 public class Manager : MonoBehaviour
 {
@@ -19,6 +19,7 @@ public class Manager : MonoBehaviour
     public Transform CollectionContentTransform;
     public Transform DeckContentTransform;
     public Transform DeckDropdownTransform;
+    public Transform SortingDropdown;
     public Transform Pool;
 
     private string request;
@@ -47,7 +48,7 @@ public class Manager : MonoBehaviour
         AddDeckOption();
         deckDropdown.value = 0;
 
-    StartCoroutine(Util.ApiRequest(request, SetUpCardCollection));
+        StartCoroutine(Util.ApiRequest(request, SetUpCardCollection));
     }
 
     /**
@@ -58,9 +59,9 @@ public class Manager : MonoBehaviour
         foreach (GameObject item in MenuPanels)
         {
             if (item == panel)
-                item.SetActive(true);
+                item.SetActive(true); // enable the needed one 
             else
-                item.SetActive(false);
+                item.SetActive(false); // disable the rest
         }
     }
 
@@ -69,8 +70,9 @@ public class Manager : MonoBehaviour
         if (_json != null)
         {
             cards = JsonConvert.DeserializeObject<PokemonMultiData>(_json);
-
-            ClearContentsOf(CollectionContentTransform);
+            SetUpRarityNo();
+           
+            ClearContentsOf(CollectionContentTransform);            
 
             Debug.Log("cards size: " + cards.data.Count);
 
@@ -82,6 +84,7 @@ public class Manager : MonoBehaviour
 
                 newCard_GO.GetComponent<CardInfo>().Init(item);
             }
+            SortCollectionCards(0);
         }
         //int pageCount; //3ekina me 0
 
@@ -161,6 +164,7 @@ public class Manager : MonoBehaviour
     public void LoadDeckCards()
     {
         ClearContentsOf(DeckContentTransform);
+        SortDeck();
 
         foreach (Data cardData in AllDecks[ActiveDeck_id - 1].cards)
         {
@@ -176,6 +180,8 @@ public class Manager : MonoBehaviour
             AllDecks[ActiveDeck_id - 1].cards.Add(cardData);
             CreateDeckItem(cardData);
         }
+        SortDeck(true);
+
         ClearSelections();
 
     }
@@ -202,10 +208,7 @@ public class Manager : MonoBehaviour
         foreach (Transform item in Pool)
         {
             if(item.CompareTag(tag))
-            {
-                Debug.Log("found a tag " + tag + "it's: " + item.name);
                 return item.gameObject;
-            }
         }
         return null;
     }
@@ -241,6 +244,120 @@ public class Manager : MonoBehaviour
     {
         //Debug.Log("---looking for deckID: " + (manager.ActiveDeck_id - 1));
         return AllDecks[ActiveDeck_id - 1].cards;
+    }
+
+    public static int SortByName(Data c1, Data c2)
+    {
+        return c1.name.CompareTo(c2.name);
+    }
+    public static int SortByType(Data c1, Data c2)
+    {
+        return c1.types[0].CompareTo(c2.types[0]);
+    }
+    public static int SortByHP(Data c1, Data c2)
+    {
+        return int.Parse(c1.hp).CompareTo(int.Parse(c2.hp));
+    }
+    public static int SortByRarityNo(Data c1, Data c2)
+    {
+        //Debug.Log(c1.rarity);
+        return c1.rarityNo.CompareTo(c2.rarityNo);
+    }
+
+    private void SetUpRarityNo()
+    {
+        foreach (Data cardData in cards.data)
+        {
+            switch (cardData.rarity)
+            {
+                case "Common":
+                    cardData.rarityNo = 0;
+                    break;
+                case "Uncommon":
+                    cardData.rarityNo = 1;
+                    break;
+                case "Rare":
+                    cardData.rarityNo = 2;
+                    break;
+                case "Rare Holo":
+                    cardData.rarityNo = 3;
+                    break;
+                case "Rare Holo GX":
+                    cardData.rarityNo = 4;
+                    break;
+                case "Rare Holo EX":
+                    cardData.rarityNo = 5;
+                    break;
+                case "Rare Holo V":
+                    cardData.rarityNo = 6;
+                    break;
+                case "Rare Ultra":
+                    cardData.rarityNo = 7;
+                    break;
+                case "Promo":
+                    cardData.rarityNo = 8;
+                    break;
+                default: // empty
+                    cardData.rarityNo = 9;
+                    break;
+            }
+        }
+    }
+
+    public void SortCollectionCards(int dropdownValue)
+    {
+        if (dropdownValue == 0)
+            cards.data.Sort(SortByType);
+        else if (dropdownValue == 1)
+            cards.data.Sort(SortByHP);
+        else
+            cards.data.Sort(SortByRarityNo);
+
+        RearrangeCards(cards.data, CollectionContentTransform);       
+    }
+
+    /**
+     * sort deck cards alphabetically and rearrange them
+     */
+    public void SortDeck(bool rearrange = false)
+    {
+        //Debug.Log("deck size: " + )
+        AllDecks[ActiveDeck_id - 1].cards.Sort(SortByName);
+
+        if(rearrange)
+            RearrangeCards(AllDecks[ActiveDeck_id - 1].cards, DeckContentTransform);
+    }
+
+
+    public void RearrangeCards(List<Data> cardData, Transform contentParent)
+    {
+        int childNo;
+        //if (contentParent.childCount < 1)
+        //    return;
+        for (int i = 0; i < cardData.Count; i++)
+        {
+            childNo = FindCardIn(cardData[i], contentParent);
+            
+            if(childNo != -1)
+                contentParent.GetChild(childNo).SetSiblingIndex(i);
+            else
+                Debug.Log("card name, type, hp, rarityNo that is not in the content: " + cardData[i].name + "-" + cardData[i].types[0] + "-" + cardData[i].hp + "-" + cardData[i].rarityNo);
+        }
+    }
+
+    /**
+     * 
+     */
+    private int FindCardIn(Data cardData, Transform contentParent)
+    {
+        Transform cardGO;
+        for (int i = 0; i < contentParent.childCount; i++)
+        {
+            cardGO = contentParent.GetChild(i);
+            if (cardGO.GetComponent<CardInfo>().cardData == cardData)
+                return i;
+        }
+        return -1;
     }
 
     public void Quit()
