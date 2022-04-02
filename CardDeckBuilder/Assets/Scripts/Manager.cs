@@ -9,9 +9,6 @@ using UnityEngine.UI;
 public class Manager : MonoBehaviour
 {
     public List<GameObject> MenuPanels;
-    //public GameObject MainMenu_panel;
-    //public GameObject About_panel;
-    //public GameObject DeckBuilder_panel;
 
     public GameObject CardPrefab;
     public GameObject CardTitlePrefab;
@@ -63,12 +60,6 @@ public class Manager : MonoBehaviour
             else
                 item.SetActive(false); // disable the rest
         }
-
-        //if (panel == MenuPanels[2]) // deck builder panel
-        //{
-        //    Debug.Log("setup collection");
-        //    SetUpCardCollection();
-        //}
     }
 
     public void OnCardsReceived(string _json)
@@ -91,29 +82,13 @@ public class Manager : MonoBehaviour
 
         foreach (Data item in cards.data)
         {
-            GameObject newCard_GO;// = CheckPoolFor("ImageCard");
-            //if(newCard_GO == null)
-                newCard_GO = Instantiate(CardPrefab, CollectionContentTransform);
+            GameObject newCard_GO;
+            newCard_GO = Instantiate(CardPrefab, CollectionContentTransform);
 
             newCard_GO.GetComponent<CardInfo>().Init(item);
         }
         SortCollectionCards(0);
-        
-        //int pageCount; //3ekina me 0
-
-        //int minCount = pageCount * 20;
-
-        //int maxCount = minCount + 20;
-
-        //for (int i = minCount; i < maxCount; i++)
-        //{ 
-
-        //}
-        // k otan patas next pas pageCount++ k 3anakaneis instanitae ts epomenes
-        // 8a kaneis na elegxo an to maxCount einai megalitero apo to length tou 
-        //cards array tote to maxCount einai to length tou array. 
-        //emmm opws exeis tora to scroll content. na mpoun apo katw. 
-        //ena next button de3ia, ena previous button aristera. k sti mesi 8a leei "Page 1/100"
+       
     }
 
 
@@ -334,7 +309,8 @@ public class Manager : MonoBehaviour
             if(childNo != -1)
                 contentParent.GetChild(childNo).SetSiblingIndex(i);
             else
-                Debug.Log("card name, type, hp, rarityNo that is not in the content: " + cardData[i].name + "-" + cardData[i].types[0] + "-" + cardData[i].hp + "-" + cardData[i].rarityNo);
+                Debug.Log("card name, type, hp, rarityNo that is not in the content: " 
+                    + cardData[i].name + "-" + cardData[i].types[0] + "-" + cardData[i].hp + "-" + cardData[i].rarityNo);
         }
     }
 

@@ -33,17 +33,6 @@ public class CardInfo : MonoBehaviour
         }
     }
 
-    //public void ShowCardMenu(bool b)
-    //{
-    //    if (b && CardExistsInDeck() != -1)
-    //        removeButton.interactable = false; // disable if doesn't exists in the deck
-
-    //    if (b && cardMenuPanel.activeInHierarchy) // if already open, then close
-    //        cardMenuPanel.SetActive(!b);
-    //    else
-    //        cardMenuPanel.SetActive(b);
-    //}
-
     public void CardGotSelected_to_add()
     {
         if (thisButton.interactable) // if it just got selected
