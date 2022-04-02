@@ -33,22 +33,22 @@ public class Manager : MonoBehaviour
     public int ActiveDeck_id;
     private void Awake()
     {
-        ActivatePanel(MenuPanels[0]); // main menu
+        ActivatePanel(MenuPanels[3]); // loading panel
     }
 
     public void Start()
     {       
         selectedCards = new List<Data>();
-        //AllDecks = new List<DeckInfo>();
         deckDropdown = DeckDropdownTransform.GetComponent<TMP_Dropdown>();
-        //request = "https://api.pokemontcg.io/v2/cards/xy1-1";
-        request = "https://api.pokemontcg.io/v2/cards";
+        request = "https://api.pokemontcg.io/v2/cards?page=1&pageSize=60"; // 
 
         deckDropdown.ClearOptions();
+        ClearContentsOf(DeckContentTransform);
         AddDeckOption();
         deckDropdown.value = 0;
 
-        StartCoroutine(Util.ApiRequest(request, SetUpCardCollection));
+        StartCoroutine(Util.ApiRequest(request, OnCardsReceived));
+        
     }
 
     /**
@@ -63,29 +63,42 @@ public class Manager : MonoBehaviour
             else
                 item.SetActive(false); // disable the rest
         }
+
+        //if (panel == MenuPanels[2]) // deck builder panel
+        //{
+        //    Debug.Log("setup collection");
+        //    SetUpCardCollection();
+        //}
     }
 
-    public void SetUpCardCollection(string _json)
+    public void OnCardsReceived(string _json)
     {
         if (_json != null)
         {
             cards = JsonConvert.DeserializeObject<PokemonMultiData>(_json);
-            SetUpRarityNo();
-           
-            ClearContentsOf(CollectionContentTransform);            
-
-            Debug.Log("cards size: " + cards.data.Count);
-
-            foreach (Data item in cards.data)
-            {
-                GameObject newCard_GO;// = CheckPoolFor("ImageCard");
-                //if(newCard_GO == null)
-                    newCard_GO = Instantiate(CardPrefab, CollectionContentTransform);
-
-                newCard_GO.GetComponent<CardInfo>().Init(item);
-            }
-            SortCollectionCards(0);
+            ActivatePanel(MenuPanels[0]); // main menu
+            
         }
+    }
+
+    public void SetUpCardCollection()
+    {       
+        SetUpRarityNo();
+           
+        ClearContentsOf(CollectionContentTransform);            
+
+        Debug.Log("cards size: " + cards.data.Count);
+
+        foreach (Data item in cards.data)
+        {
+            GameObject newCard_GO;// = CheckPoolFor("ImageCard");
+            //if(newCard_GO == null)
+                newCard_GO = Instantiate(CardPrefab, CollectionContentTransform);
+
+            newCard_GO.GetComponent<CardInfo>().Init(item);
+        }
+        SortCollectionCards(0);
+        
         //int pageCount; //3ekina me 0
 
         //int minCount = pageCount * 20;
@@ -143,11 +156,7 @@ public class Manager : MonoBehaviour
 
         AddDropdownOption(id.ToString()); // add new deck's id to the dropdown
 
-        //Debug.Log("dropdown value: " + deckDropdown.value + "which is: " + deckDropdown.options[deckDropdown.value].text);
-
         deckDropdown.value = Dropdown.allSelectableCount;
-        //Debug.Log("deckdropdown value: " +deckDropdown.value);
-        //Debug.Log("deckdropdown options: " + deckDropdown.options);
     }
 
     public void AddDropdownOption(string optionName)
@@ -176,7 +185,6 @@ public class Manager : MonoBehaviour
     {
         foreach (Data cardData in selectedCards)
         {
-            //Debug.Log("add to deck: " + ActiveDeck_id + " and adding cardID: " + cardData.id);
             AllDecks[ActiveDeck_id - 1].cards.Add(cardData);
             CreateDeckItem(cardData);
         }
@@ -226,19 +234,6 @@ public class Manager : MonoBehaviour
             item.GetComponent<Button>().interactable = true;
         }
     }
-
-
-    //public int CardExistsInDeck()
-    //{
-    //    List<Data> ActiveDeckCards = GetActiveDeckCards(); // search at the active deck if this card exists already
-    //    for (int i = 0; i < ActiveDeckCards.Count; i++)
-    //    {
-    //        Data currentCard = ActiveDeckCards[i];
-    //        if (cardData.id == currentCard.id)
-    //            return i;
-    //    }
-    //    return -1;
-    //}
 
     private List<Data> GetActiveDeckCards()
     {
@@ -321,7 +316,6 @@ public class Manager : MonoBehaviour
      */
     public void SortDeck(bool rearrange = false)
     {
-        //Debug.Log("deck size: " + )
         AllDecks[ActiveDeck_id - 1].cards.Sort(SortByName);
 
         if(rearrange)
@@ -332,8 +326,7 @@ public class Manager : MonoBehaviour
     public void RearrangeCards(List<Data> cardData, Transform contentParent)
     {
         int childNo;
-        //if (contentParent.childCount < 1)
-        //    return;
+
         for (int i = 0; i < cardData.Count; i++)
         {
             childNo = FindCardIn(cardData[i], contentParent);
