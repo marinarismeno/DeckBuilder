@@ -53,6 +53,7 @@ public static class Util
         else
         {
             string rawJson = Encoding.Default.GetString(www.downloadHandler.data);
+            Debug.Log("raw json: " + rawJson);
             callback(rawJson);
         }
     }

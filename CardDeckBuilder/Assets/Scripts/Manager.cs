@@ -72,6 +72,9 @@ public class Manager : MonoBehaviour
         }
     }
 
+    /**
+     * called by the create a deck button on the main menu (OnClick)
+     */
     public void SetUpCardCollection()
     {       
         SetUpRarityNo();
